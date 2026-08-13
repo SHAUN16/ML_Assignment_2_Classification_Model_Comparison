@@ -51,13 +51,122 @@ METRIC_DEFINITIONS = [
 ]
 
 
+def apply_app_styles():
+    st.markdown(
+        """
+        <style>
+            :root {
+                --accent: #2563eb;
+                --accent-soft: #eff6ff;
+                --border: #d8dee9;
+                --ink-muted: #4b5563;
+                --panel: #f8fafc;
+            }
+
+            .block-container {
+                padding-top: 2rem;
+                padding-bottom: 3rem;
+                max-width: 1180px;
+            }
+
+            h1 {
+                font-size: 2.15rem;
+                font-weight: 750;
+                letter-spacing: 0;
+                margin-bottom: 0.25rem;
+            }
+
+            h3 {
+                padding-top: 1rem;
+                border-top: 1px solid var(--border);
+                margin-top: 1.8rem;
+            }
+
+            [data-testid="stMetric"] {
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 0.8rem 0.95rem;
+                color: #111827;
+            }
+
+            [data-testid="stMetricLabel"] p {
+                color: var(--ink-muted);
+                font-size: 0.85rem;
+            }
+
+            [data-testid="stMetricValue"] {
+                color: #111827;
+                font-size: 1.35rem;
+                font-weight: 700;
+            }
+
+            [data-testid="stMetricDelta"] {
+                color: #374151;
+            }
+
+            div[data-testid="stDataFrame"] {
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .info-panel {
+                background: var(--accent-soft);
+                border-left: 4px solid var(--accent);
+                border-radius: 8px;
+                padding: 0.9rem 1rem;
+                margin: 0.8rem 0 1rem;
+                color: #1f2937;
+            }
+
+            .source-note {
+                color: var(--ink-muted);
+                font-size: 0.92rem;
+                margin-top: 0.3rem;
+            }
+
+            .page-indicator {
+                text-align: center;
+                color: var(--ink-muted);
+                font-size: 0.95rem;
+                padding-top: 0.45rem;
+            }
+
+            .stButton > button {
+                border-radius: 8px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_intro():
+    st.caption("Pre-trained classification model comparison")
+
+
 def render_dataset_description():
     st.subheader("Dataset Description")
     st.write(DATASET_DESCRIPTION)
-    st.write(TARGET_DESCRIPTION)
-    st.write(DATASET_VERSION_DESCRIPTION)
+
+    overview_cols = st.columns(3)
+    overview_cols[0].metric("Input Variables", "16")
+    overview_cols[1].metric("Target", "y")
+    overview_cols[2].metric("Task", "Binary Classification")
+
+    st.markdown(
+        f"<div class='info-panel'>{TARGET_DESCRIPTION}</div>",
+        unsafe_allow_html=True
+    )
     st.info(PREDICTION_DATASET_NOTE)
-    st.write(DATASET_SOURCE)
+
+    with st.expander("Dataset Version and Source", expanded=False):
+        st.write(DATASET_VERSION_DESCRIPTION)
+        st.markdown(
+            f"<div class='source-note'>{DATASET_SOURCE}</div>",
+            unsafe_allow_html=True
+        )
 
     st.write("Column Definitions")
     st.dataframe(
@@ -99,7 +208,7 @@ def display_paginated_table(df, rows_per_page=20, page_key="current_page", key_p
 
     with page_col:
         st.markdown(
-            f"<div style='text-align: center;'>"
+            f"<div class='page-indicator'>"
             f"Page {current_page:,} of {total_pages:,}"
             f"</div>",
             unsafe_allow_html=True
@@ -117,10 +226,10 @@ def display_paginated_table(df, rows_per_page=20, page_key="current_page", key_p
 
 
 def render_dataset_preview(df, key_prefix="dataset"):
-    st.write(
-        f"**Rows:** {df.shape[0]:,}  |  "
-        f"**Columns:** {df.shape[1]:,}"
-    )
+    summary_cols = st.columns(2)
+    summary_cols[0].metric("Rows", f"{df.shape[0]:,}")
+    summary_cols[1].metric("Columns", f"{df.shape[1]:,}")
+
     st.subheader("Dataset Preview")
     display_paginated_table(
         df,
@@ -137,8 +246,10 @@ def render_prediction_results():
 
     st.subheader("Results")
     st.write("Prediction Results")
-    st.write(f"**Model:** {st.session_state.prediction_model_name}")
-    st.write(f"**Total predictions:** {len(result_df):,}")
+    result_cols = st.columns(2)
+    result_cols[0].metric("Model", st.session_state.prediction_model_name)
+    result_cols[1].metric("Total Predictions", f"{len(result_df):,}")
+
     display_paginated_table(
         result_df,
         rows_per_page=ROWS_PER_PAGE,
@@ -148,7 +259,11 @@ def render_prediction_results():
 
     st.write("Prediction Distribution")
     distribution = result_df["predicted_y"].value_counts().rename_axis("Predicted Class").reset_index(name="Count")
-    st.dataframe(distribution, use_container_width=True)
+    dist_cols = st.columns([1, 2])
+    with dist_cols[0]:
+        st.dataframe(distribution, use_container_width=True, hide_index=True)
+    with dist_cols[1]:
+        render_prediction_distribution_plot(distribution)
 
 
 def render_evaluation():
@@ -190,19 +305,49 @@ def render_evaluation():
 
 
 def render_confusion_matrix_plot(confusion_matrix_df):
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(6.5, 4.3), facecolor="white")
+    ax.set_facecolor("white")
     sns.heatmap(
         confusion_matrix_df,
         annot=True,
         fmt="d",
-        cmap="Blues",
+        cmap=sns.light_palette("#2563eb", as_cmap=True),
         cbar=False,
         linewidths=0.5,
+        linecolor="white",
+        annot_kws={"fontsize": 12, "fontweight": "bold", "color": "#111827"},
         ax=ax
     )
-    ax.set_xlabel("Predicted Class")
-    ax.set_ylabel("Actual Class")
-    ax.set_title("Confusion Matrix")
+    ax.set_xlabel("Predicted Class", color="#111827")
+    ax.set_ylabel("Actual Class", color="#111827")
+    ax.set_title("Confusion Matrix", color="#111827")
+    ax.tick_params(colors="#111827")
+    fig.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
+
+def render_prediction_distribution_plot(distribution):
+    fig, ax = plt.subplots(figsize=(6.5, 3.2), facecolor="white")
+    ax.set_facecolor("white")
+    sns.barplot(
+        data=distribution,
+        x="Predicted Class",
+        y="Count",
+        color="#2563eb",
+        ax=ax
+    )
+    ax.set_title("Predicted Class Counts", color="#111827")
+    ax.set_xlabel("Predicted Class", color="#111827")
+    ax.set_ylabel("Count", color="#111827")
+    ax.grid(axis="y", alpha=0.25)
+    ax.tick_params(colors="#111827")
+
+    for container in ax.containers:
+        ax.bar_label(container, fmt="%d", padding=3, color="#111827")
+
+    sns.despine(ax=ax)
+    fig.tight_layout()
     st.pyplot(fig)
     plt.close(fig)
 
@@ -243,21 +388,32 @@ def render_roc_curve_plot(evaluation):
         st.info("ROC curve is unavailable because the target contains only one class.")
         return
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(evaluation["fpr"], evaluation["tpr"], label="Model ROC", color="#1f77b4", linewidth=2)
-    ax.plot([0, 1], [0, 1], linestyle="--", color="gray", label="Random baseline")
-    ax.set_xlabel("False Positive Rate")
-    ax.set_ylabel("True Positive Rate")
-    ax.set_title("ROC Curve")
+    fig, ax = plt.subplots(figsize=(6.5, 4.3), facecolor="white")
+    ax.set_facecolor("white")
+    ax.plot(evaluation["fpr"], evaluation["tpr"], label="Model ROC", color="#2563eb", linewidth=2.4)
+    ax.fill_between(evaluation["fpr"], evaluation["tpr"], alpha=0.12, color="#2563eb")
+    ax.plot([0, 1], [0, 1], linestyle="--", color="#6b7280", label="Random baseline")
+    ax.set_xlabel("False Positive Rate", color="#111827")
+    ax.set_ylabel("True Positive Rate", color="#111827")
+    ax.set_title("ROC Curve", color="#111827")
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.grid(True, alpha=0.3)
+    ax.tick_params(colors="#111827")
 
     if evaluation["auc"] is not None:
-        ax.legend(title=f"AUC = {evaluation['auc']:.4f}")
+        legend = ax.legend(title=f"AUC = {evaluation['auc']:.4f}")
     else:
-        ax.legend()
+        legend = ax.legend()
 
+    legend.get_frame().set_facecolor("white")
+    legend.get_frame().set_edgecolor("#d1d5db")
+    for text in legend.get_texts():
+        text.set_color("#111827")
+    legend.get_title().set_color("#111827")
+
+    sns.despine(ax=ax)
+    fig.tight_layout()
     st.pyplot(fig)
     plt.close(fig)
 

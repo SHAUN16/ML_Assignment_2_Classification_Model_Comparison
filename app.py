@@ -10,10 +10,12 @@ from data_utils import load_sample_dataset, load_uploaded_dataset
 from model_utils import create_prediction_result, load_models
 from state_utils import clear_prediction_state, reset_page_if_dataset_changed, save_prediction_state
 from ui_components import (
+    apply_app_styles,
     render_dataset_description,
     render_dataset_preview,
     render_download,
     render_evaluation,
+    render_intro,
     render_prediction_results,
 )
 
@@ -25,7 +27,9 @@ st.set_page_config(
     layout="wide"
 )
 
+apply_app_styles()
 st.title(APP_TITLE)
+render_intro()
 
 
 # --- Dataset Description ---
