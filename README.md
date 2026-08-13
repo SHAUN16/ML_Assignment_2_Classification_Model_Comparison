@@ -65,13 +65,13 @@ bank-marketing-classification/
 ## Current Status
 
 * [x] Dataset selection and retrieval
-* [ ] Data exploration
-* [ ] Train/test split
-* [ ] Preprocessing pipeline
-* [ ] Train five classification models
-* [ ] Evaluate model performance
-* [ ] Save trained models
-* [ ] Streamlit application
+* [x] Data exploration
+* [x] Train/test split
+* [x] Preprocessing pipeline
+* [x] Train five classification models
+* [x] Evaluate model performance
+* [x] Save trained models
+* [x] Streamlit application
 * [ ] Deployment
 * [ ] Final documentation
 
