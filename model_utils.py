@@ -7,8 +7,10 @@ from config import (
     MODELS_DIR,
     POSITIVE_CLASS_ALIASES,
     POSITIVE_CLASS_LABEL,
+    TARGET_COLUMN,
 )
 from data_utils import split_features_and_target
+from evaluation_utils import build_evaluation
 
 
 def apply_sklearn_model_compatibility_patch():
@@ -99,3 +101,38 @@ def create_prediction_result(model, input_df):
         "positive_probabilities": positive_probabilities,
         "probability_warning": probability_warning,
     }
+
+
+def build_model_comparison(models, input_df):
+    if TARGET_COLUMN not in input_df.columns:
+        return None, ["Model comparison is available only when the dataset contains the target column `y`."]
+
+    rows = []
+    errors = []
+
+    for model_name, model in models.items():
+        try:
+            prediction = create_prediction_result(model, input_df)
+            evaluation = build_evaluation(
+                prediction["y_true"],
+                prediction["y_pred"],
+                prediction["positive_probabilities"]
+            )
+            rows.append(
+                {
+                    "Model": model_name,
+                    "Accuracy": evaluation["accuracy"],
+                    "AUC": evaluation["auc"],
+                    "Precision": evaluation["precision"],
+                    "Recall": evaluation["recall"],
+                    "F1": evaluation["f1"],
+                    "MCC": evaluation["mcc"],
+                }
+            )
+        except Exception:
+            errors.append(f"Could not evaluate {model_name} for model comparison.")
+
+    if not rows:
+        return None, errors
+
+    return rows, errors

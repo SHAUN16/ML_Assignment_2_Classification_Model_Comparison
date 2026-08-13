@@ -10,6 +10,9 @@ def clear_prediction_state():
         "prediction_model_name",
         "prediction_dataset_id",
         "results_page",
+        "model_comparison_rows",
+        "model_comparison_errors",
+        "model_comparison_dataset_id",
     ]:
         st.session_state.pop(key, None)
 

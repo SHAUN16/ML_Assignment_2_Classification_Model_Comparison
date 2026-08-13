@@ -15,6 +15,7 @@ from config import (
     TARGET_DESCRIPTION,
 )
 from evaluation_utils import build_evaluation
+from model_utils import build_model_comparison
 
 
 METRIC_DEFINITIONS = [
@@ -432,3 +433,83 @@ def render_download():
         file_name=f"bank_marketing_{model_file_name}_results.csv",
         mime="text/csv"
     )
+
+
+def render_model_comparison(models, df, dataset_id):
+    st.subheader("Model Comparison")
+
+    if st.session_state.get("model_comparison_dataset_id") != dataset_id:
+        with st.spinner("Comparing all models on the selected dataset..."):
+            comparison_rows, comparison_errors = build_model_comparison(models, df)
+
+        st.session_state.model_comparison_rows = comparison_rows
+        st.session_state.model_comparison_errors = comparison_errors
+        st.session_state.model_comparison_dataset_id = dataset_id
+    else:
+        comparison_rows = st.session_state.get("model_comparison_rows")
+        comparison_errors = st.session_state.get("model_comparison_errors", [])
+
+    for error in comparison_errors:
+        st.warning(error)
+
+    if comparison_rows is None:
+        return
+
+    comparison_df = pd.DataFrame(comparison_rows)
+    metric_columns = ["Accuracy", "AUC", "Precision", "Recall", "F1", "MCC"]
+    best_by_metric = build_best_model_summary(comparison_df, metric_columns)
+
+    st.write("Models vs Metrics")
+    st.dataframe(
+        style_model_comparison(comparison_df, metric_columns),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.write("Best Model by Metric")
+    st.dataframe(best_by_metric, use_container_width=True, hide_index=True)
+
+
+def style_model_comparison(comparison_df, metric_columns):
+    def highlight_best(column):
+        if column.name not in metric_columns:
+            return [""] * len(column)
+
+        best_value = column.max(skipna=True)
+        return [
+            "background-color: #dcfce7; color: #14532d; font-weight: 700;"
+            if value == best_value
+            else ""
+            for value in column
+        ]
+
+    return comparison_df.style.apply(highlight_best, axis=0).format(
+        {metric: "{:.4f}" for metric in metric_columns}
+    )
+
+
+def build_best_model_summary(comparison_df, metric_columns):
+    rows = []
+
+    for metric in metric_columns:
+        metric_values = comparison_df[metric].dropna()
+        if metric_values.empty:
+            rows.append(
+                {
+                    "Metric": metric,
+                    "Best Model": "Unavailable",
+                    "Score": "Unavailable",
+                }
+            )
+            continue
+
+        best_index = metric_values.idxmax()
+        rows.append(
+            {
+                "Metric": metric,
+                "Best Model": comparison_df.loc[best_index, "Model"],
+                "Score": f"{comparison_df.loc[best_index, metric]:.4f}",
+            }
+        )
+
+    return pd.DataFrame(rows)

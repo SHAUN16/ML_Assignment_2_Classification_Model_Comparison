@@ -16,6 +16,7 @@ from ui_components import (
     render_download,
     render_evaluation,
     render_intro,
+    render_model_comparison,
     render_prediction_results,
 )
 
@@ -129,3 +130,8 @@ if df is not None:
 # --- Download ---
 if df is not None:
     render_download()
+
+
+# --- Model Comparison ---
+if df is not None and "models" in locals() and models:
+    render_model_comparison(models, df, dataset_id)
