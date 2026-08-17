@@ -105,6 +105,19 @@ The Streamlit application includes:
 
 ## Installation
 
+## Git LFS Note
+
+The trained `.joblib` model files are stored using Git LFS because some model files are large. After cloning the repository, make sure Git LFS is installed and pull the model files:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+If the model files are not pulled correctly, the Streamlit app may show model loading errors.
+
+## Run Locally
+
 Install the required dependencies using:
 
 ```bash
