@@ -101,7 +101,6 @@ The Streamlit application includes:
 - Prediction output display
 - Evaluation metrics
 - Confusion matrix
-- Classification report
 - Model comparison table
 
 ## Installation
