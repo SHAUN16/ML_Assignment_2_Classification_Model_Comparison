@@ -103,20 +103,29 @@ The Streamlit application includes:
 - Confusion matrix
 - Model comparison table
 
-## Installation
+## Run Locally
 
-## Git LFS Note
+The repository includes helper scripts that pull Git LFS model files, create a local `.venv` virtual environment, install dependencies, and start the Streamlit app.
 
-The trained `.joblib` model files are stored using Git LFS because some model files are large. After cloning the repository, make sure Git LFS is installed and pull the model files:
+On Linux or BITS VM, run:
 
 ```bash
-git lfs install
-git lfs pull
+bash run_app.sh
 ```
 
-If the model files are not pulled correctly, the Streamlit app may show model loading errors.
+On Windows PowerShell, run:
 
-## Run Locally
+```powershell
+.\run_app.ps1
+```
+
+If PowerShell blocks script execution, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run_app.ps1
+```
+
+## Manual Setup
 
 Install the required dependencies using:
 
@@ -128,4 +137,11 @@ Run the Streamlit app locally using:
 
 ```bash
 streamlit run app.py
+```
+
+If the app shows model loading errors after cloning, make sure Git LFS is installed and run:
+
+```bash
+git lfs install
+git lfs pull
 ```
