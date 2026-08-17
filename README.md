@@ -1,79 +1,108 @@
 # Bank Marketing Classification
 
-A machine learning classification project using the **UCI Bank Marketing dataset** to predict whether a customer will subscribe to a term deposit.
+## Problem Statement
 
-## Project Overview
+This project predicts whether a bank customer will subscribe to a term deposit using supervised machine learning classification models. The goal is to compare multiple classification algorithms on the same dataset and identify the best-performing model based on standard evaluation metrics.
 
-This project implements and compares five supervised machine learning classification models:
+## Dataset Description
 
-* Logistic Regression
-* Decision Tree
-* K-Nearest Neighbors (KNN)
-* Naive Bayes
-* Random Forest
+The project uses the Bank Marketing dataset from the UCI Machine Learning Repository. The data is related to direct marketing campaigns of a Portuguese banking institution, where customers were contacted by phone.
 
-The models are trained and evaluated using the Bank Marketing dataset. Model performance is compared using multiple classification metrics, and the trained models are saved for later use in the Streamlit application.
+The target variable is `y`, which indicates whether the customer subscribed to a term deposit:
 
-## Dataset
+| Target Value | Meaning |
+|---|---|
+| 0 | Customer did not subscribe |
+| 1 | Customer subscribed |
 
-The project uses the **Bank Marketing dataset** from the UCI Machine Learning Repository.
+The dataset contains bank client information, campaign details, previous campaign outcomes, and the final subscription result. This project uses 16 input features and 1 output target column, satisfying the assignment requirement of at least 12 features and at least 500 instances.
 
-The dataset is retrieved programmatically using `ucimlrepo`, rather than storing the complete dataset in this repository.
+## GitHub Repository Link
 
-## Models
+https://github.com/SHAUN16/ML_Assignment_2_Classification_Model_Comparison
 
-The following models are evaluated:
+## Live Streamlit App Link
+
+https://shaun16-ml-assignment-2-classification-model-compari-app-waecyl.streamlit.app
+
+## Models Used
+
+The following five classification models were implemented and evaluated on the same dataset:
 
 1. Logistic Regression
-2. Decision Tree
-3. K-Nearest Neighbors
-4. Naive Bayes
-5. Random Forest
+2. Decision Tree Classifier
+3. K-Nearest Neighbor Classifier
+4. Naive Bayes Classifier
+5. Random Forest Classifier
 
-## Evaluation Metrics
+## Model Evaluation Metrics
 
-The models are compared using:
+| ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
+|---|---:|---:|---:|---:|---:|---:|
+| Logistic Regression | 0.9012 | 0.9056 | 0.6445 | 0.3478 | 0.4518 | 0.4261 |
+| Decision Tree | 0.8746 | 0.7015 | 0.4649 | 0.4754 | 0.4701 | 0.3990 |
+| KNN | 0.8962 | 0.8277 | 0.5990 | 0.3403 | 0.4340 | 0.4001 |
+| Naive Bayes | 0.8548 | 0.8101 | 0.4059 | 0.5198 | 0.4559 | 0.3774 |
+| Random Forest | 0.9045 | 0.9263 | 0.6506 | 0.3960 | 0.4924 | 0.4597 |
 
-* Accuracy
-* AUC
-* Precision
-* Recall
-* F1 Score
-* Matthews Correlation Coefficient (MCC)
+## Best Model by Metric
+
+| Metric | Best Model | Score |
+|---|---|---:|
+| Accuracy | Random Forest | 0.9045 |
+| AUC | Random Forest | 0.9263 |
+| Precision | Random Forest | 0.6506 |
+| Recall | Naive Bayes | 0.5198 |
+| F1 | Random Forest | 0.4924 |
+| MCC | Random Forest | 0.4597 |
+
+## Model Performance Observations
+
+| ML Model Name | Observation about model performance |
+|---|---|
+| Logistic Regression | Achieved high accuracy and AUC, showing strong overall discrimination, but recall was low, meaning it missed many positive subscription cases. |
+| Decision Tree | Produced more balanced precision and recall than some models, but its AUC and overall accuracy were lower than Random Forest and Logistic Regression. |
+| KNN | Performed reasonably well in accuracy and precision, but recall was low, so it was less effective at identifying customers who subscribed. |
+| Naive Bayes | Achieved the highest recall, making it better at detecting positive subscription cases, but it had the lowest precision and accuracy among the models. |
+| Random Forest | Delivered the best accuracy, AUC, precision, F1 score, and MCC, making it the most consistent model overall for this dataset. |
+| Overall Winner for this dataset | Random Forest is the overall winner because it performed best on five out of six evaluation metrics and had the strongest balance of predictive performance. |
 
 ## Project Structure
 
 ```text
-bank-marketing-classification/
-│
-├── app.py
-├── requirements.txt
-├── test_data.csv
-├── README.md
-│
-├── models/
-│   ├── logistic_regression.joblib
-│   ├── decision_tree.joblib
-│   ├── knn.joblib
-│   ├── naive_bayes.joblib
-│   └── random_forest.joblib
-│
-└── notebooks/
-    └── bank_marketing.ipynb
+project-folder/
+|-- app.py
+|-- requirements.txt
+|-- README.md
+|-- test_data.csv
+|-- config.py
+|-- data_utils.py
+|-- evaluation_utils.py
+|-- model_utils.py
+|-- state_utils.py
+|-- ui_components.py
+|-- models/
+|   |-- logistic_regression.joblib
+|   |-- decision_tree.joblib
+|   |-- knn.joblib
+|   |-- naive_bayes.joblib
+|   |-- random_forest.joblib
+|-- notebooks/
+|   |-- bank_marketing.ipynb
 ```
 
-## Current Status
+## Streamlit Application Features
 
-* [x] Dataset selection and retrieval
-* [x] Data exploration
-* [x] Train/test split
-* [x] Preprocessing pipeline
-* [x] Train five classification models
-* [x] Evaluate model performance
-* [x] Save trained models
-* [x] Streamlit application
-* [ ] Deployment
-* [ ] Final documentation
+The Streamlit application includes:
+
+- CSV dataset upload option
+- Sample test dataset loading
+- Model selection dropdown
+- Prediction output display
+- Evaluation metrics
+- Confusion matrix
+- Classification report
+- Model comparison table
 
 ## Installation
 
@@ -83,4 +112,8 @@ Install the required dependencies using:
 pip install -r requirements.txt
 ```
 
+Run the Streamlit app locally using:
 
+```bash
+streamlit run app.py
+```
